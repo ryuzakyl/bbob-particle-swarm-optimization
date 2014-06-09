@@ -1,0 +1,30 @@
+1 (F1): Noise-free Sphere function
+2 (F2): Separable ellipsoid with monotone transformation
+    
+    Parameter: condition number (default 1e6)
+
+    
+3 (F3): Rastrigin with monotone transformation separable "condition" 10
+4 (F4): skew Rastrigin-Bueche, condition 10, skew-"condition" 100
+5 (F5): Linear slope
+6 (F6): Attractive sector function
+7 (F7): Step-ellipsoid, condition 100, noise-free
+8 (F8): Rosenbrock noise-free
+9 (F9): Rosenbrock, rotated
+10 (F10): Ellipsoid with monotone transformation, condition 1e6
+11 (F11): Discus (tablet) with monotone transformation, condition 1e6
+12 (F12): Bent cigar with asymmetric space distortion, condition 1e6
+13 (F13): Sharp ridge
+14 (F14): Sum of different powers, between x^2 and x^6, noise-free
+15 (F15): Rastrigin with asymmetric non-linear distortion, "condition" 10
+16 (F16): Weierstrass, condition 100
+17 (F17): Schaffers F7 with asymmetric non-linear transformation, condition 10
+18 (F18): Schaffers F7 with asymmetric non-linear transformation, condition 1000
+19 (F19): F8F2 sum of Griewank-Rosenbrock 2-D blocks, noise-free
+20 (F20): Schwefel with tridiagonal variable transformation
+21 (F21): Gallagher with 101 Gaussian peaks, condition up to 1000, one global rotation, noise-free
+22 (F22): Gallagher with 21 Gaussian peaks, condition up to 1000, one global rotation
+23 (F23): Katsuura function
+24 (F24): Lunacek bi-Rastrigin, condition 100
+
+    in PPSN 2008, Rastrigin part rotated and scaled
