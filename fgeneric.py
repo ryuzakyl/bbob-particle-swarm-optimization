@@ -16,7 +16,7 @@ Example:
     -61.233399680000005
     >>> f.finalizerun()  # reset counter for f-evaluations etc
 
-For other examples of how to use fgeneric, see exampleexperiment.py and exampletiming.py
+For other examples of how to use fgeneric, see main.py and exampletiming.py
 
 Test:
     
