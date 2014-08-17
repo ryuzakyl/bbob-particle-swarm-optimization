@@ -75,7 +75,8 @@ def perform_bbob_benchmarks(iinstances, trials):
             f.setfun(*bn.instantiate(objective_function_id, iinstance=iinstance))
 
             # running the heuristic
-            random_search(f.evalfun, dimension, maxfunevals, box_restr, f.ftarget)
+            # _, _, = random_search(f.evalfun, dimension, maxfunevals, box_restr, f.ftarget)
+            _, _, = pso(f.evalfun, dimension, maxfunevals, box_restr, f.ftarget)
 
             # printing information related to each 'run'
             print(
