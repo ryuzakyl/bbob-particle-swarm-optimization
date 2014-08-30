@@ -46,13 +46,20 @@ REFLECT = 2
 
 # neighbours criteria
 RANDOM = 0      # the neighbours list is selected randomly
-ADJACENT = 1    # the neighbours list is selected  a priori (neigh_size/2 to left and right)
+ADJACENT = 1    # the neighbours list is selected a priori (neigh_size/2 to left and right)
+RAND_FIX = 2    # the neighbours list is selected randomly just once
+SANDWICH = 3    # the neighbours are the previous and the next element
+
+neigh_dict = dict()
+
 
 # count of particles in swarm
-swarm_size = 50
+swarm_size = 100
 
 # maximum of 5 neighbours
-neigh_size = min(5, swarm_size / 10)
+# neigh_size = min(5, swarm_size / 10)
+neigh_size = 80
+
 
 # amount of velocity to be retained
 alpha = 0.2
@@ -60,21 +67,21 @@ alpha = 0.2
 # how much of personal best is taken into account
 #   if 'beta' is large => the particle will become a separate hill climber
 #   if 'beta' is lower => it will be more of a global search rather that local search
-beta = 0.4
+beta = 0.2
 
 # how much of the global best is considered
 #   if 'sigma' is large => particles tend to move towards the best known region
 #   if 'sigma' is lower => more like separate hill climbers
-sigma = 0.2  # just for now
+sigma = 0.3  # just for now
 
 # how much of the neighbours (informants) is considered (mid-ground between 'beta' and 'sigma')
-#   more neighbours means that points to a global best instead of a particle's local best
+# more neighbours means that points to a global best instead of a particle's local best
 gamma = (beta + sigma) / 2.0
 
 # how fast the particle moves
 # if 'epsilon' is large => the particle might miss some important areas
 # if 'epsilon' is lower => do fine-grain optimization (kind of like hill climbing)
-epsilon = 1  # just for now
+epsilon = 2.5  # just for now
 
 # ---------------------- pso algorithm ----------------------
 
@@ -83,7 +90,6 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
     # the particle swarm
     x = init_swarm(swarm_size, dim, box_restr)
     x_prev = init_swarm(swarm_size, dim, box_restr)  # previous position (values) of the particles
-    # x_prev = x.copy()  # previous position (values) of the particles
 
     # best solutions found by each particle
     x_aster = x.copy()
@@ -113,7 +119,8 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
                 f_aster[p] = f_curr[p]
 
             # updating 'x_plus' fittest solution
-            neighbours = get_neighbours(p, neigh_type=ADJACENT)
+            neighbours = get_neighbours(p, neigh_type=RANDOM)
+
             best_n_index = np.argmin([f_curr[k] for k in neighbours])
             best_n_index = best_n_index if f_curr[best_n_index] < f_curr[p] else p
 
@@ -138,16 +145,16 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
 
                 xi = x[p][i]
                 s1 = alpha*v[i]
-                s2 = b*(x_aster[p][i]-xi)
-                s3 = c*(x_plus[p][i]-xi)
-                s4 = d*(x_best[i]-xi)
+                s2 = b * (x_aster[p][i] - xi)
+                s3 = c * (x_plus[p][i] - xi)
+                s4 = d * (x_best[i] - xi)
                 v[i] = s1 + s2 + s3 + s4
 
             # updating x_prev
             x_prev[p] = x[p]
 
             # moving particle p
-            x[p] = x[p] + epsilon*v
+            x[p] += epsilon*v
 
         # the optimum has been reached
         if f_best < f_target:
@@ -173,6 +180,7 @@ def get_neighbours(p_index, neigh_type=RANDOM):
     if neigh_type == RANDOM:
         # getting list of neighbours
         return rnd.sample(xrange(swarm_size), neigh_size)
+
     elif neigh_type == ADJACENT:
         half = neigh_size / 2
 
@@ -184,5 +192,18 @@ def get_neighbours(p_index, neigh_type=RANDOM):
 
         # getting list of neighbours
         return left + right
+
+    elif neigh_type == RAND_FIX:
+        if p_index not in neigh_dict.keys():
+            # candidates list
+            elegible_particles = range(0, p_index) + range(p_index, swarm_size)
+            neigh_particles = rnd.sample(elegible_particles, neigh_size)
+            neigh_dict[p_index] = neigh_particles
+
+        return neigh_dict[p_index]
+
+    elif neigh_type == SANDWICH:
+        return [(p_index - 1) % swarm_size, (p_index + 1) % swarm_size]
+
     else:
         raise Exception('Unknown particle neghbourhood type.')
