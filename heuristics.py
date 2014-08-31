@@ -68,20 +68,29 @@ alpha = 0.2
 #   if 'beta' is large => the particle will become a separate hill climber
 #   if 'beta' is lower => it will be more of a global search rather that local search
 beta = 0.2
+beta_ini = 0.1
+beta_end = 0.2
 
 # how much of the global best is considered
 #   if 'sigma' is large => particles tend to move towards the best known region
 #   if 'sigma' is lower => more like separate hill climbers
 sigma = 0.3  # just for now
+sigma_ini = 0.3
+sigma_end = 0.4
 
 # how much of the neighbours (informants) is considered (mid-ground between 'beta' and 'sigma')
 # more neighbours means that points to a global best instead of a particle's local best
-gamma = (beta + sigma) / 2.0
+# gamma = (beta + sigma) / 2.0
+gamma = 0.3
+gamma_ini = 0.4
+gamma_end = 0.3
 
 # how fast the particle moves
 # if 'epsilon' is large => the particle might miss some important areas
 # if 'epsilon' is lower => do fine-grain optimization (kind of like hill climbing)
 epsilon = 2.5  # just for now
+epsilon_ini = 2.5
+epsilon_end = 2.0
 
 # ---------------------- pso algorithm ----------------------
 
@@ -105,6 +114,18 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
 
     # amount of iterations
     iter_count = max_fun_evals / swarm_size
+
+    curr_beta = beta_ini
+    beta_dx = (beta_end - beta_ini) / iter_count
+
+    curr_gamma = gamma_ini
+    gamma_dx = (gamma_end - gamma_ini) / iter_count
+
+    curr_sigma = sigma_ini
+    sigma_dx = (sigma_end - sigma_ini) / iter_count
+
+    curr_epsilon = epsilon_ini
+    epsilon_dx = (epsilon_end - epsilon_ini) / iter_count
 
     # iterating over the particle swarm
     for iteration in xrange(iter_count):
@@ -137,14 +158,14 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
             v = x[p] - x_prev[p]
             for i in xrange(dim):
                 # random in [0, beta]
-                b = rnd.random() * beta
+                b = rnd.random() * curr_beta
                 # random in [0, gamma]
                 c = rnd.random() * gamma
                 # random in [0, sigma]
-                d = rnd.random() * sigma
+                d = rnd.random() * curr_sigma
 
                 xi = x[p][i]
-                s1 = alpha*v[i]
+                s1 = alpha * v[i]
                 s2 = b * (x_aster[p][i] - xi)
                 s3 = c * (x_plus[p][i] - xi)
                 s4 = d * (x_best[i] - xi)
@@ -154,11 +175,17 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
             x_prev[p] = x[p]
 
             # moving particle p
-            x[p] += epsilon*v
+            x[p] += epsilon * v
 
         # the optimum has been reached
         if f_best < f_target:
             break
+
+        # updating values for beta, sigma and epsilon
+        curr_beta += beta_dx
+        curr_gamma += gamma_dx
+        curr_sigma += sigma_dx
+        curr_epsilon += epsilon_dx
 
     # returns best sample and it's fitness value
     return x_best, f_best
