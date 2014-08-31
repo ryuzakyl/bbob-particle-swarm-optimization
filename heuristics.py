@@ -92,6 +92,11 @@ epsilon = 2.5  # just for now
 epsilon_ini = 2.5
 epsilon_end = 2.0
 
+# -----------------------------------------------------------
+
+# random particle generator
+part_gen = lambda space_dim, lb, ub: lb + np.random.rand(space_dim) * (ub - lb)
+
 # ---------------------- pso algorithm ----------------------
 
 
@@ -112,6 +117,9 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
     x_best = None
     f_best = np.Inf
 
+    # getting box restrictions
+    lb, ub = box_restr
+
     # amount of iterations
     iter_count = max_fun_evals / swarm_size
 
@@ -129,6 +137,16 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
 
     # iterating over the particle swarm
     for iteration in xrange(iter_count):
+        # keeping particles in [lb, ub]
+        for k in xrange(swarm_size):
+            # if particle out of limits
+            if np.any(np.logical_or(x[k] < lb, x[k] > ub)):
+                # generating random particle inside limits
+                new_part = part_gen(50, lb, ub)
+                x[k] = new_part
+                # assigning 'zero' to the direction of such particle
+                x_prev[k] = new_part
+
         # fitness of each particle in the current iteration
         f_curr = f(x)
 
@@ -194,9 +212,6 @@ def pso(f, dim, max_fun_evals=10000, box_restr=(-5, 5), f_target=-np.Inf):
 def init_swarm(n, dim, box_restr):
     # getting the box restriction parameters
     x_min, x_max = box_restr
-
-    # random particle generator
-    part_gen = lambda space_dim, lb, ub: lb + np.random.rand(space_dim) * (ub - lb)
 
     # generating a swarm of 'count' particles
     return np.array([part_gen(dim, x_min, x_max) for i in xrange(n)])
